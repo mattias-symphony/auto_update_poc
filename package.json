@@ -1,0 +1,21 @@
+{
+  "name": "auto-update-poc",
+  "version": "0.0.1",
+  "description": "Proof of concept auto update servcice",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preinstall": "npm run build",
+    "build": "mc -U sample.mc & rc /nologo -r sample.rc & link -dll -noentry -out:sample.dll sample.res /nologo /machine:x86 & cl Svc.cpp /nologo & cl SvcConfig.cpp /nologo & cl SvcControl.cpp /nologo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattias-symphony/auto_update_poc.git"
+  },
+  "author": "symphony",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattias-symphony/auto_update_poc/issues"
+  },
+  "homepage": "https://github.com/mattias-symphony/auto_update_poc",
+  "os": "win32"
+}
