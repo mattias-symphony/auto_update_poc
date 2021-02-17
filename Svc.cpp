@@ -4,6 +4,8 @@
 #include "sample.h"
 
 #pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "Shell32.lib")
+
 
 #define SVCNAME TEXT("SvcName")
 
@@ -163,6 +165,29 @@ VOID WINAPI SvcMain( DWORD dwArgc, LPTSTR *lpszArgv )
     SvcInit( dwArgc, lpszArgv );
 }
 
+
+
+DWORD WINAPI MyThreadFunction( LPVOID lpParam ) 
+{ 
+	for( ; ; ) {
+		Sleep(30*1000); // Sleep 30 seconds
+		WIN32_FIND_DATA file;
+		HANDLE dir = FindFirstFile( "c:\\auto_update_poc\\*.msi", &file );
+		if( dir != INVALID_HANDLE_VALUE ) {
+			char filename[ 260 ];
+			sprintf( filename, "c:\\auto_update_poc\\%s", file.cFileName );
+			char newFilename[ 260 ];
+			sprintf( newFilename, "c:\\auto_update_poc\\done\\%s", file.cFileName );
+			MoveFile( filename, newFilename );
+			char command[ 512 ];
+			sprintf( command, "/i c:\\auto_update_poc\\done\\%s /q", file.cFileName );
+			ShellExecute( NULL, "open", "msiexec", command, NULL, SW_SHOW );
+		}
+	}
+
+    return 0; 
+} 
+
 //
 // Purpose: 
 //   The service code
@@ -178,6 +203,15 @@ VOID WINAPI SvcMain( DWORD dwArgc, LPTSTR *lpszArgv )
 //
 VOID SvcInit( DWORD dwArgc, LPTSTR *lpszArgv)
 {
+	DWORD threadId;
+	HANDLE thread = CreateThread( 
+		NULL,                   // default security attributes
+		0,                      // use default stack size  
+		MyThreadFunction,       // thread function name
+		NULL,          			// argument to thread function 
+		0,                      // use default creation flags 
+		&threadId );   // returns the thread identifier 
+	
     // TO_DO: Declare and set any required variables.
     //   Be sure to periodically call ReportSvcStatus() with 
     //   SERVICE_START_PENDING. If initialization fails, call
